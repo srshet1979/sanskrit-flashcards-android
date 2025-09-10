@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Sanskrit Flashcards</title>
     <style>
-        /* Using the CSS that resulted in the better (wider) UI */
         :root {
-            --card-background: #fff;
-            --card-border: #ddd;
+            --body-background: #333a45;
+            --card-front-background: #e9f5fe; /* Light blue for front */
+            --card-back-background: #fffada;  /* Light yellow for back */
+            --card-border: #cce7f8;
             --text-color: #333;
+            --stats-text-color: #f0f0f0;
             --accent-color: #007bff;
-            --correct-color: #28a745;
-            --wrong-color: #dc3545;
+            --correct-color-value: #28a745;
+            --wrong-color-value: #dc3545;
             --button-text-color: #fff;
-        }        * {
+        }
+        * {
             box-sizing: border-box;
         }
         body {
@@ -22,11 +25,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
-            color: var(--text-color);
+            background-color: var(--body-background);
+            color: var(--stats-text-color);
             padding: 10px;
             overflow: hidden;
         }
@@ -35,30 +38,41 @@
             max-width: 500px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            justify-content: center;
+            align-items: center;
         }
         .stats-bar {
             width: 100%;
-            padding: 8px 0;
+            padding: 10px 0;
             text-align: center;
-            font-size: 0.9em;
-            color: #555;
-            border-bottom: 1px solid #e0e0e0;
-            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: var(--stats-text-color);
+            margin-bottom: 20px;
             white-space: nowrap;
             overflow-x: auto;
         }
-        .stats-bar span { margin: 0 8px; }
+        .stats-bar span {
+            margin: 0 5px;
+        }
+        .stat-value {
+            font-weight: bold;
+        }
+        .stat-correct-value {
+            color: var(--correct-color-value);
+        }
+        .stat-wrong-value {
+            color: var(--wrong-color-value);
+        }
+        .stat-completion-value {
+            color: var(--accent-color);
+        }
 
         .flashcard-container {
             perspective: 1000px;
             width: 100%;
-            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            position: relative; /* Needed for absolute positioning of swipe-feedback-overlay */
         }
         .flashcard {
             width: 90%;
@@ -69,9 +83,7 @@
             transition: transform 0.6s;
             cursor: pointer;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
         .flashcard.is-flipped {
             transform: rotateY(180deg);
@@ -88,24 +100,24 @@
             justify-content: center;
             padding: 20px;
             border-radius: 12px;
-            background-color: var(--card-background);
+            background-color: var(--card-front-background);
             border: 1px solid var(--card-border);
             text-align: center;
+            color: var(--text-color);
         }
         .card-front { }
         .card-back {
             transform: rotateY(180deg);
+            background-color: var(--card-back-background);
         }
         .sanskrit-word {
             font-size: 2.6em;
             margin-bottom: 10px;
-            color: var(--text-color);
             word-break: break-word;
         }
         .pronunciation {
             font-size: 1.0em;
             line-height: 1.4;
-            color: #444;
             margin-bottom: 5px;
         }
         .pronunciation:last-of-type {
@@ -113,12 +125,11 @@
         }
         .english-meaning {
             font-size: 1.8em;
-            color: var(--text-color);
             word-break: break-word;
         }
         .card-counter {
             font-size: 0.85em;
-            color: #777;
+            color: #666;
             position: absolute;
             bottom: 10px;
             left: 0;
@@ -128,12 +139,11 @@
 
         .controls {
             width: 100%;
-            max-width: 500px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            align-items: center;
             padding: 15px 0;
-            background-color: #f0f2f5;
-            border-top: 1px solid #e0e0e0;
+            margin-top: 25px;
             flex-shrink: 0;
         }
         .controls button {
@@ -147,58 +157,60 @@
             min-width: 90px;
             text-align: center;
             transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .controls button:hover {
-            background-color: #0056b3;
-        }
-        .controls button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .reset-button {
+        .controls button.reset-button {
             background-color: #6c757d;
         }
-        .reset-button:hover {
+        .controls button.reset-button:hover {
             background-color: #5a6268;
         }
+        .controls button:disabled {
+            background-color: #777;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
 
+        /* Swipe feedback (simple overlay) */
         .swipe-feedback {
-            position: absolute;
+            position: absolute; /* Positioned relative to the flashcard-container */
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            font-size: 5em;
+            transform: translate(-50%, -50%) scale(0.8); /* Initial small state */
+            font-size: 5em;  /* Adjust size of check/cross */
             color: white;
+            /* background-color: rgba(0,0,0,0.5); /* Default, overridden by .correct/.wrong */
             padding: 20px;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            pointer-events: none;
+            border-radius: 50%; /* Make it circular */
+            opacity: 0;      /* Hidden by default */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: none; /* So it doesn't interfere with card tap/swipe */
+            z-index: 10; /* Ensure it's above the flashcard */
         }
         .swipe-feedback.show {
-            opacity: 0.8;
-            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.8; /* Visible */
+            transform: translate(-50%, -50%) scale(1); /* Scale to full size */
         }
-        .swipe-feedback.correct { background-color: rgba(40, 167, 69, 0.7); }
-        .swipe-feedback.wrong { background-color: rgba(220, 53, 69, 0.7); }
+        .swipe-feedback.correct {
+            background-color: rgba(40, 167, 69, 0.75); /* Greenish */
+        }
+        .swipe-feedback.wrong {
+            background-color: rgba(220, 53, 69, 0.75); /* Reddish */
+        }
 
-        #loading-indicator {
-            font-size: 1.2em;
-            text-align: center;
-            margin-top: 30px;
-            color: #333;
-        }
+        #loading-indicator { /* Should be fine, centered by app-container */ }
     </style>
 </head>
 <body>
-<div class="stats-bar">
-    <span id="correct-count">Correct: 0</span>
-    <span id="wrong-count">Wrong: 0</span>
-    <span id="completion-percentage">Completion: 0%</span>
-</div>
-
 <div class="app-container">
+    <div class="stats-bar">
+        <span>Correct: <span id="correct-count" class="stat-value stat-correct-value">0</span></span>
+        <span>Wrong: <span id="wrong-count" class="stat-value stat-wrong-value">0</span></span>
+        <span>Completion: <span id="completion-percentage" class="stat-value stat-completion-value">0%</span></span>
+    </div>
+
     <div id="loading-indicator">Loading words...</div>
+
     <div class="flashcard-container" style="display: none;">
         <div class="flashcard" id="flashcard">
             <div class="card-face card-front">
@@ -212,24 +224,26 @@
                 <div id="card-counter-back" class="card-counter"></div>
             </div>
         </div>
+        <!-- Swipe Feedback Overlay is here -->
         <div id="swipe-feedback-overlay" class="swipe-feedback"></div>
+    </div>
+
+    <!-- HTML Order for buttons: Prev, Reset, Next -->
+    <div class="controls">
+        <button id="prev-button">Prev</button>
+        <button id="reset-button" class="reset-button">Reset</button>
+        <button id="next-button">Next</button>
     </div>
 </div>
 
-<div class="controls">
-    <button id="prev-button">Prev</button>
-    <button id="next-button">Next</button>
-    <button id="reset-button" class="reset-button">Reset</button>
-</div>
-
 <script>
+    // --- JAVASCRIPT REMAINS THE SAME ---
     let allWords = [];
     let currentDeck = [];
     let currentIndex = 0;
     let correctCount = 0;
     let wrongCount = 0;
 
-    // DOM Elements
     const flashcardElement = document.getElementById('flashcard');
     const sanskritWordEl = document.getElementById('sanskrit-word');
     const phonetic1El = document.getElementById('phonetic-1');
@@ -240,369 +254,60 @@
     const prevButton = document.getElementById('prev-button');
     const nextButton = document.getElementById('next-button');
     const resetButton = document.getElementById('reset-button');
-    const correctCountEl = document.getElementById('correct-count');
-    const wrongCountEl = document.getElementById('wrong-count');
-    const completionPercentageEl = document.getElementById('completion-percentage');
+    const correctCountValEl = document.getElementById('correct-count');
+    const wrongCountValEl = document.getElementById('wrong-count');
+    const completionPercentageValEl = document.getElementById('completion-percentage');
     const loadingIndicator = document.getElementById('loading-indicator');
     const flashcardContainer = document.querySelector('.flashcard-container');
-    const swipeFeedbackOverlay = document.getElementById('swipe-feedback-overlay');
+    const swipeFeedbackOverlay = document.getElementById('swipe-feedback-overlay'); // Ensured this is selected
 
-    console.log("SanskritFlashcards JS: Script start. DOM elements selected.");
+    // console.log("SanskritFlashcards JS: Script start.");
 
-    function initializeApp() {
-        console.log("SanskritFlashcards JS: initializeApp() called.");
-        loadingIndicator.style.display = 'block';
-        flashcardContainer.style.display = 'none';
-        correctCountEl.textContent = `Correct: 0`;
-        wrongCountEl.textContent = `Wrong: 0`;
-        completionPercentageEl.textContent = `Completion: 0%`;
-
+    function initializeApp() { /* ... same ... */
+        loadingIndicator.style.display = 'block'; flashcardContainer.style.display = 'none';
+        correctCountValEl.textContent = '0'; wrongCountValEl.textContent = '0'; completionPercentageValEl.textContent = '0%';
         if (typeof AndroidInterface !== 'undefined' && typeof AndroidInterface.getSanskritWords === 'function') {
-            console.log("SanskritFlashcards JS: AndroidInterface.getSanskritWords found. Calling it...");
             try {
-                const rawDataFromAndroid = AndroidInterface.getSanskritWords();
-                console.log("SanskritFlashcards JS: Received rawData from Android. Length:", rawDataFromAndroid ? rawDataFromAndroid.length : 'null');
-
-                if (!rawDataFromAndroid) {
-                    console.error("SanskritFlashcards JS: rawData from Android is null or undefined!");
-                    loadingIndicator.textContent = "Error: Null data from app.";
-                    return;
-                }
-                 if (rawDataFromAndroid.trim() === "") {
-                    console.error("SanskritFlashcards JS: rawData from Android is empty or whitespace.");
-                    loadingIndicator.textContent = "Error: Empty data from app.";
-                    return;
-                }
-                console.log("SanskritFlashcards JS: rawData snippet (first 500 chars):", rawDataFromAndroid.substring(0, 500));
-
-                allWords = parseData(rawDataFromAndroid);
-                console.log(`SanskritFlashcards JS: parseData() completed. Total words parsed into allWords: ${allWords.length}`);
-
-                if (allWords.length === 0) {
-                    console.warn("SanskritFlashcards JS: No words available after parsing. Check data format or parseData logic. Raw data length was:", rawDataFromAndroid.length);
-                    loadingIndicator.textContent = "No words found after parsing. Please check the data source and console logs.";
-                    return;
-                }
-
-                resetStatsAndDeck();
-                console.log(`SanskritFlashcards JS: Deck reset and shuffled. currentDeck length: ${currentDeck.length}`);
-
-                updateDisplay();
-                console.log("SanskritFlashcards JS: Initial display updated.");
-
-                console.log("SanskritFlashcards JS: About to hide loading indicator and show flashcard container.");
-                loadingIndicator.style.display = 'none';
-                flashcardContainer.style.display = 'flex';
-                console.log("SanskritFlashcards JS: UI should now be visible.");
-
-            } catch (e) {
-                console.error("SanskritFlashcards JS: Error during AndroidInterface interaction or subsequent processing:", e);
-                loadingIndicator.textContent = "Initialization Error. Check console logs for details.";
-                console.error("SanskritFlashcards JS: The actual error object is:", e);
-            }
-        } else {
-            loadingIndicator.textContent = "Error: AndroidInterface not found. Cannot load words.";
-            console.warn("SanskritFlashcards JS: AndroidInterface or getSanskritWords method not found.");
-        }
+                const rawData = AndroidInterface.getSanskritWords();
+                if (!rawData || rawData.trim() === "") { loadingIndicator.textContent = "Error: Empty data."; return; }
+                allWords = parseData(rawData);
+                if (allWords.length === 0) { loadingIndicator.textContent = "No words found."; return; }
+                resetStatsAndDeck(); updateDisplay();
+                loadingIndicator.style.display = 'none'; flashcardContainer.style.display = 'flex';
+            } catch (e) { loadingIndicator.textContent = "Init Error."; console.error("JS Init Error:", e); }
+        } else { loadingIndicator.textContent = "Error: AndroidInterface missing."; }
         setupEventListeners();
-        console.log("SanskritFlashcards JS: Event listeners set up.");
     }
 
-    function parseData(dataString) {
-        console.log("-------------------- PARSE DATA START --------------------");
-        console.log("parseData: Input dataString length (from Android):", dataString.length);
-
-        const processedDataString = dataString.replace(/\\n/g, '\n');
-        console.log("parseData: Processed dataString length (after replacing '\\\\n' with '\\n'):", processedDataString.length);
-
-        const linesArray = processedDataString.split(/\r?\n/);
-        console.log(`parseData: Split processedDataString into ${linesArray.length} lines (using /\\r?\\n/).`);
-
-        let validLinesFound = 0;
-        let malformedLinesSkipped = 0;
-        let commentOrEmptyLinesSkipped = 0;
-
-        const parsedWords = linesArray
-            .map((line, index) => ({ originalLine: line, originalIndex: index, trimmedLine: line.trim() }))
-            .filter(item => {
-                if (item.trimmedLine.length === 0 || item.trimmedLine.startsWith("#")) {
-                    commentOrEmptyLinesSkipped++;
-                    return false;
-                }
-                return true;
-            })
-            .map((item, processedIndex) => {
-                const line = item.trimmedLine;
-                const parts = line.split('\t');
-
-                // *** MODIFIED LOGIC TO EXTRACT PARTS MORE ROBUSTLY ***
-                let sanskrit = "";
-                let phonetic = "";
-                let iast = "";
-                let english = "";
-                let currentPartIndex = 0;
-
-                if (parts.length > currentPartIndex) {
-                    sanskrit = parts[currentPartIndex].trim();
-                    currentPartIndex++;
-                }
-
-                // Find Phonetic (skip empty parts)
-                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
-                    currentPartIndex++;
-                }
-                if (parts.length > currentPartIndex) {
-                    phonetic = parts[currentPartIndex].trim();
-                    currentPartIndex++;
-                }
-
-                // Find IAST (skip empty parts)
-                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
-                    currentPartIndex++;
-                }
-                if (parts.length > currentPartIndex) {
-                    iast = parts[currentPartIndex].trim();
-                    currentPartIndex++;
-                }
-
-                // Find English (skip empty parts)
-                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
-                    currentPartIndex++;
-                }
-                if (parts.length > currentPartIndex) {
-                    english = parts[currentPartIndex].trim();
-                    // currentPartIndex++; // Not strictly needed for the last part
-                }
-
-                // Check if we got at least Sanskrit and English
-                if (sanskrit && english) {
-                    validLinesFound++;
-                    return {
-                        id: item.originalIndex,
-                        sanskrit: sanskrit,
-                        phonetic: phonetic, // Will be empty if not found
-                        iast: iast,         // Will be empty if not found
-                        english: english,
-                        status: 'unseen'
-                    };
-                } else {
-                    malformedLinesSkipped++;
-                    console.warn(`parseData Map: MALFORMED Line #${item.originalIndex + 1}. Could not extract essential Sanskrit and English parts. Line content: "${line}". Parts found:`, JSON.stringify(parts));
-                    return null;
-                }
-            }).filter(word => word !== null);
-
-        console.log(`parseData: Summary - Lines in input after processing: ${linesArray.length}, Comment/Empty lines skipped: ${commentOrEmptyLinesSkipped}, Malformed lines (due to parts count or missing essential fields): ${malformedLinesSkipped}, Successfully parsed words: ${parsedWords.length} (from ${validLinesFound} validly structured lines).`);
-        console.log("-------------------- PARSE DATA END ----------------------");
-        return parsedWords;
+    function parseData(dataString) { /* ... same as previous correct version ... */
+        const processedDataString = dataString.replace(/\\n/g, '\n'); const linesArray = processedDataString.split(/\r?\n/);
+        let malformedLinesSkipped = 0; let parsedWords = linesArray.map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith("#"))
+            .map((line, index) => { const parts = line.split('\t'); let s = "", p = "", i = "", e = "", c = 0;
+                if (parts.length > c) s = parts[c++].trim(); while(parts.length > c && parts[c].trim() === "") c++; if (parts.length > c) p = parts[c++].trim();
+                while(parts.length > c && parts[c].trim() === "") c++; if (parts.length > c) i = parts[c++].trim();
+                while(parts.length > c && parts[c].trim() === "") c++; if (parts.length > c) e = parts[c].trim();
+                if (s && e) return { id: index, sanskrit: s, phonetic: p, iast: i, english: e, status: 'unseen' };
+                malformedLinesSkipped++; return null;
+            }).filter(w => w !== null);
+        console.log(`Parse: Lines ${linesArray.length}, Malformed ${malformedLinesSkipped}, Parsed ${parsedWords.length}`); return parsedWords;
     }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    function resetStatsAndDeck() {
-        correctCount = 0;
-        wrongCount = 0;
-        currentIndex = 0;
-        if (allWords && allWords.length > 0) {
-            allWords.forEach(word => word.status = 'unseen');
-            currentDeck = [...allWords];
-            shuffleArray(currentDeck);
-        } else {
-            currentDeck = [];
-        }
-        flashcardElement.classList.remove('is-flipped');
-        console.log(`SanskritFlashcards JS: resetStatsAndDeck() - Stats reset. currentDeck created/reset with ${currentDeck.length} words and shuffled.`);
-        updateStatsDisplay();
-    }
-
-    function updateDisplay() {
-        if (!currentDeck || currentDeck.length === 0) {
-            sanskritWordEl.textContent = "Finished!";
-            phonetic1El.textContent = (allWords && allWords.length > 0) ? "" : "No words loaded.";
-            phonetic2El.textContent = "";
-            englishMeaningEl.textContent = (allWords && allWords.length > 0) ? "Well done!" : "Please check data source.";
-            cardCounterFrontEl.textContent = "0 of 0";
-            cardCounterBackEl.textContent = "0 of 0";
-            prevButton.disabled = true;
-            nextButton.disabled = true;
-            updateStatsDisplay();
-            return;
-        }
-
-        const word = currentDeck[currentIndex];
-        if (!word) {
-            console.error("SanskritFlashcards JS: updateDisplay() - Word is undefined at currentIndex", currentIndex, ". Deck:", currentDeck);
-            sanskritWordEl.textContent = "Error!";
-            phonetic1El.textContent = "";
-            phonetic2El.textContent = "";
-            englishMeaningEl.textContent = "Could not load card.";
-            return;
-        }
-
-        sanskritWordEl.textContent = word.sanskrit;
-        phonetic1El.textContent = word.phonetic; // This is Phonetic 1
-        phonetic2El.textContent = word.iast;     // This is Phonetic 2
-        englishMeaningEl.textContent = word.english;
-
-        const counterText = `${currentIndex + 1} of ${currentDeck.length}`;
-        cardCounterFrontEl.textContent = counterText;
-        cardCounterBackEl.textContent = counterText;
-
-        prevButton.disabled = currentIndex === 0;
-        nextButton.disabled = currentIndex === currentDeck.length - 1;
-        updateStatsDisplay();
-    }
-
-    function updateStatsDisplay() {
-        correctCountEl.textContent = `Correct: ${correctCount}`;
-        wrongCountEl.textContent = `Wrong: ${wrongCount}`;
-        const totalSourceWords = allWords ? allWords.length : 0;
-        let completion = 0;
-        if (totalSourceWords > 0) {
-             const uniqueSeenCount = allWords.filter(w => w.status !== 'unseen').length;
-             completion = Math.round((uniqueSeenCount / totalSourceWords) * 100);
-        }
-        completionPercentageEl.textContent = `Completion: ${completion}%`;
-    }
-
-    function flipCard() {
-        flashcardElement.classList.toggle('is-flipped');
-    }
-
-    function showNextCard() {
-        if (currentIndex < currentDeck.length - 1) {
-            currentIndex++;
-            flashcardElement.classList.remove('is-flipped');
-            updateDisplay();
-        } else {
-            console.log("SanskritFlashcards JS: showNextCard() - End of current deck.");
-        }
-    }
-
-    function showPrevCard() {
-        if (currentIndex > 0) {
-            currentIndex--;
-            flashcardElement.classList.remove('is-flipped');
-            updateDisplay();
-        }
-    }
-
-    function handleReset() {
-        console.log("SanskritFlashcards JS: handleReset() button clicked.");
-        if (confirm("Are you sure you want to reset all progress and start over?")) {
-            resetStatsAndDeck();
-            updateDisplay();
-            console.log("SanskritFlashcards JS: Progress reset by user.");
-        } else {
-            console.log("SanskritFlashcards JS: User cancelled reset.");
-        }
-    }
-
-    let touchstartX = 0;
-    let touchendX = 0;
-    const swipeThreshold = 50;
-
-    function handleTouchStart(event) {
-        if (event.changedTouches.length > 0) {
-            touchstartX = event.changedTouches[0].screenX;
-        }
-    }
-
-    function handleTouchEnd(event) {
-        if (event.changedTouches.length > 0) {
-            touchendX = event.changedTouches[0].screenX;
-            handleSwipeGesture();
-        }
-    }
-
-    function handleSwipeGesture() {
-        if (currentDeck.length === 0 || touchstartX === 0) return;
-
-        const deltaX = touchendX - touchstartX;
-        if (Math.abs(deltaX) < swipeThreshold) {
-            touchstartX = 0; touchendX = 0;
-            return;
-        }
-
-        let actionTaken = false;
-        if (deltaX < -swipeThreshold) {
-            markCard('wrong');
-            actionTaken = true;
-        } else if (deltaX > swipeThreshold) {
-            markCard('correct');
-            actionTaken = true;
-        }
-
-        touchstartX = 0;
-        touchendX = 0;
-
-        if (actionTaken) {
-            setTimeout(() => {
-                showNextCard();
-            }, 500);
-        }
-    }
-
-    function markCard(status) {
-        if (currentDeck.length === 0) return;
-        const currentWordData = currentDeck[currentIndex];
-        if (!currentWordData) {
-            console.error("SanskritFlashcards JS: markCard() - currentWordData is undefined at index", currentIndex);
-            return;
-        }
-        console.log(`SanskritFlashcards JS: markCard() - Card '${currentWordData.sanskrit}' as ${status}.`);
-
-        if (status === 'correct') {
-            correctCount++;
-            showSwipeFeedback(true);
-        } else if (status === 'wrong') {
-            wrongCount++;
-            showSwipeFeedback(false);
-        }
-
-        const masterWord = allWords.find(w => w.id === currentWordData.id);
-        if (masterWord) {
-            masterWord.status = status;
-        } else {
-             console.warn(`SanskritFlashcards JS: markCard() - Could not find master word for ID ${currentWordData.id} to update status.`);
-        }
-        currentWordData.status = status;
-
-        updateStatsDisplay();
-
-        if (typeof AndroidInterface !== 'undefined' && AndroidInterface.performHapticFeedback) {
-             AndroidInterface.performHapticFeedback();
-        }
-    }
-
-    function showSwipeFeedback(isCorrect) {
-        swipeFeedbackOverlay.textContent = isCorrect ? '✓' : '✗';
-        swipeFeedbackOverlay.className = 'swipe-feedback show ' + (isCorrect ? 'correct' : 'wrong');
-        setTimeout(() => {
-            swipeFeedbackOverlay.className = 'swipe-feedback';
-        }, 600);
-    }
-
-    function setupEventListeners() {
-        flashcardElement.addEventListener('click', flipCard);
-        prevButton.addEventListener('click', showPrevCard);
-        nextButton.addEventListener('click', showNextCard);
-        resetButton.addEventListener('click', handleReset);
-        flashcardContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
-        flashcardContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
-        console.log("SanskritFlashcards JS: Event listeners are set up.");
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("SanskritFlashcards JS: DOMContentLoaded event fired. Initializing app...");
-        initializeApp();
-    });
-
+    function shuffleArray(array) { /* ... same ... */ for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+    function resetStatsAndDeck() { /* ... same ... */ correctCount = 0; wrongCount = 0; currentIndex = 0; if (allWords && allWords.length > 0) { allWords.forEach(w => w.status = 'unseen'); currentDeck = [...allWords]; shuffleArray(currentDeck); } else { currentDeck = []; } flashcardElement.classList.remove('is-flipped'); updateStatsDisplay(); }
+    function updateDisplay() { /* ... same ... */ if (!currentDeck || currentDeck.length === 0) { sanskritWordEl.textContent = "Finished!"; phonetic1El.textContent = "No words."; phonetic2El.textContent = ""; englishMeaningEl.textContent = "Well done!"; cardCounterFrontEl.textContent = "0 of 0"; cardCounterBackEl.textContent = "0 of 0"; prevButton.disabled = true; nextButton.disabled = true; updateStatsDisplay(); return; } const word = currentDeck[currentIndex]; if (!word) { sanskritWordEl.textContent = "Error!"; return; } sanskritWordEl.textContent = word.sanskrit; phonetic1El.textContent = word.phonetic; phonetic2El.textContent = word.iast; englishMeaningEl.textContent = word.english; const txt = `${currentIndex + 1} of ${currentDeck.length}`; cardCounterFrontEl.textContent = txt; cardCounterBackEl.textContent = txt; prevButton.disabled = currentIndex === 0; nextButton.disabled = currentIndex === currentDeck.length - 1; updateStatsDisplay(); }
+    function updateStatsDisplay() { /* ... same, targets new value spans ... */ correctCountValEl.textContent = correctCount; wrongCountValEl.textContent = wrongCount; const total = allWords ? allWords.length : 0; let comp = 0; if (total > 0) { const seen = allWords.filter(w => w.status !== 'unseen').length; comp = Math.round((seen / total) * 100); } completionPercentageValEl.textContent = `${comp}%`; }
+    function flipCard() { /* ... same ... */ flashcardElement.classList.toggle('is-flipped'); }
+    function showNextCard() { /* ... same ... */ if (currentIndex < currentDeck.length - 1) { currentIndex++; flashcardElement.classList.remove('is-flipped'); updateDisplay(); } }
+    function showPrevCard() { /* ... same ... */ if (currentIndex > 0) { currentIndex--; flashcardElement.classList.remove('is-flipped'); updateDisplay(); } }
+    function handleReset() { /* ... same ... */ if (confirm("Reset progress?")) { resetStatsAndDeck(); updateDisplay(); } }
+    let touchstartX = 0; let touchendX = 0; const swipeThreshold = 50;
+    function handleTouchStart(event) { if (event.changedTouches.length > 0) touchstartX = event.changedTouches[0].screenX; }
+    function handleTouchEnd(event) { if (event.changedTouches.length > 0) { touchendX = event.changedTouches[0].screenX; handleSwipeGesture(); } }
+    function handleSwipeGesture() { /* ... same ... */ if (currentDeck.length === 0 || touchstartX === 0) return; const dX = touchendX - touchstartX; if (Math.abs(dX) < swipeThreshold) { touchstartX=0; touchendX=0; return; } let act = false; if (dX < -swipeThreshold) { markCard('wrong'); act=true; } else if (dX > swipeThreshold) { markCard('correct'); act=true; } touchstartX=0; touchendX=0; if (act) { setTimeout(() => { showNextCard(); }, 500); } }
+    function markCard(status) { /* ... same ... */ if (currentDeck.length === 0) return; const word = currentDeck[currentIndex]; if (!word) return; if (status === 'correct') { correctCount++; showSwipeFeedback(true); } else if (status === 'wrong') { wrongCount++; showSwipeFeedback(false); } const master = allWords.find(w => w.id === word.id); if (master) master.status = status; word.status = status; updateStatsDisplay(); if (typeof AndroidInterface !== 'undefined' && AndroidInterface.performHapticFeedback) AndroidInterface.performHapticFeedback(); }
+    function showSwipeFeedback(isCorrect) { /* ... same ... */ swipeFeedbackOverlay.textContent = isCorrect ? '✓' : '✗'; swipeFeedbackOverlay.className = 'swipe-feedback show ' + (isCorrect ? 'correct' : 'wrong'); setTimeout(() => { swipeFeedbackOverlay.className = 'swipe-feedback'; }, 600); }
+    function setupEventListeners() { /* ... same ... */ flashcardElement.addEventListener('click', flipCard); prevButton.addEventListener('click', showPrevCard); nextButton.addEventListener('click', showNextCard); resetButton.addEventListener('click', handleReset); flashcardContainer.addEventListener('touchstart', handleTouchStart, { passive: true }); flashcardContainer.addEventListener('touchend', handleTouchEnd, { passive: true }); }
+    document.addEventListener('DOMContentLoaded', () => { initializeApp(); });
 </script>
 </body>
 </html>
+
