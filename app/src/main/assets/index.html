@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Sanskrit Flashcards</title>
     <style>
-        /* THIS IS THE CSS FROM BEFORE THE VERY LAST UI-FOCUSED CHANGES */
-        /* It might result in the narrow card, but the goal here is to check JS execution */
+        /* Using the CSS that resulted in the better (wider) UI */
         :root {
             --card-background: #fff;
             --card-border: #ddd;
@@ -15,19 +14,20 @@
             --correct-color: #28a745;
             --wrong-color: #dc3545;
             --button-text-color: #fff;
+        }        * {
+            box-sizing: border-box;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between; /* Push controls to bottom */
+            justify-content: space-between;
             min-height: 100vh;
             margin: 0;
             background-color: #f0f2f5;
             color: var(--text-color);
             padding: 10px;
-            box-sizing: border-box;
             overflow: hidden;
         }
         .app-container {
@@ -54,22 +54,24 @@
         .flashcard-container {
             perspective: 1000px;
             width: 100%;
-            min-height: 250px;
-            margin-bottom: 20px;
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 20px;
         }
         .flashcard {
             width: 90%;
             max-width: 400px;
-            min-height: 250px;
+            min-height: 280px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.6s;
             cursor: pointer;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
         }
         .flashcard.is-flipped {
             transform: rotateY(180deg);
@@ -85,7 +87,6 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            box-sizing: border-box;
             border-radius: 12px;
             background-color: var(--card-background);
             border: 1px solid var(--card-border);
@@ -96,21 +97,27 @@
             transform: rotateY(180deg);
         }
         .sanskrit-word {
-            font-size: 2.8em;
-            margin-bottom: 15px;
+            font-size: 2.6em;
+            margin-bottom: 10px;
             color: var(--text-color);
+            word-break: break-word;
         }
         .pronunciation {
-            font-size: 1.1em;
-            line-height: 1.5;
+            font-size: 1.0em;
+            line-height: 1.4;
             color: #444;
+            margin-bottom: 5px;
+        }
+        .pronunciation:last-of-type {
+            margin-bottom: 10px;
         }
         .english-meaning {
-            font-size: 2em;
+            font-size: 1.8em;
             color: var(--text-color);
+            word-break: break-word;
         }
         .card-counter {
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: #777;
             position: absolute;
             bottom: 10px;
@@ -127,16 +134,18 @@
             padding: 15px 0;
             background-color: #f0f2f5;
             border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
         }
         .controls button {
-            padding: 12px 20px;
-            font-size: 1.1em;
+            padding: 10px 15px;
+            font-size: 1em;
             background-color: var(--accent-color);
             color: var(--button-text-color);
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            min-width: 100px;
+            min-width: 90px;
+            text-align: center;
             transition: background-color 0.2s;
         }
         .controls button:hover {
@@ -281,7 +290,6 @@
                 updateDisplay();
                 console.log("SanskritFlashcards JS: Initial display updated.");
 
-                // This is the critical part for your "Stuck on loading" issue
                 console.log("SanskritFlashcards JS: About to hide loading indicator and show flashcard container.");
                 loadingIndicator.style.display = 'none';
                 flashcardContainer.style.display = 'flex';
@@ -290,7 +298,6 @@
             } catch (e) {
                 console.error("SanskritFlashcards JS: Error during AndroidInterface interaction or subsequent processing:", e);
                 loadingIndicator.textContent = "Initialization Error. Check console logs for details.";
-                // Make sure we log the error object itself for more details
                 console.error("SanskritFlashcards JS: The actual error object is:", e);
             }
         } else {
@@ -305,21 +312,11 @@
         console.log("-------------------- PARSE DATA START --------------------");
         console.log("parseData: Input dataString length (from Android):", dataString.length);
 
-        const processedDataString = dataString.replace(/\\n/g, '\n'); // THE FIX for literal \n
+        const processedDataString = dataString.replace(/\\n/g, '\n');
         console.log("parseData: Processed dataString length (after replacing '\\\\n' with '\\n'):", processedDataString.length);
-
-        if (processedDataString.length < 500) {
-            console.log("parseData: Full processedDataString:", processedDataString);
-        } else {
-            console.log("parseData: Processed dataString (first 250 chars):", processedDataString.substring(0, 250));
-            console.log("parseData: Processed dataString (last 250 chars):", processedDataString.substring(processedDataString.length - 250));
-        }
 
         const linesArray = processedDataString.split(/\r?\n/);
         console.log(`parseData: Split processedDataString into ${linesArray.length} lines (using /\\r?\\n/).`);
-        if (linesArray.length <= 1 && processedDataString.includes("\n")) {
-             console.warn("parseData: Only one line after split, but processed string *does* contain actual newline characters. This is unexpected if replacement worked.");
-        }
 
         let validLinesFound = 0;
         let malformedLinesSkipped = 0;
@@ -337,24 +334,65 @@
             .map((item, processedIndex) => {
                 const line = item.trimmedLine;
                 const parts = line.split('\t');
-                if (parts.length >= 4) {
+
+                // *** MODIFIED LOGIC TO EXTRACT PARTS MORE ROBUSTLY ***
+                let sanskrit = "";
+                let phonetic = "";
+                let iast = "";
+                let english = "";
+                let currentPartIndex = 0;
+
+                if (parts.length > currentPartIndex) {
+                    sanskrit = parts[currentPartIndex].trim();
+                    currentPartIndex++;
+                }
+
+                // Find Phonetic (skip empty parts)
+                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
+                    currentPartIndex++;
+                }
+                if (parts.length > currentPartIndex) {
+                    phonetic = parts[currentPartIndex].trim();
+                    currentPartIndex++;
+                }
+
+                // Find IAST (skip empty parts)
+                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
+                    currentPartIndex++;
+                }
+                if (parts.length > currentPartIndex) {
+                    iast = parts[currentPartIndex].trim();
+                    currentPartIndex++;
+                }
+
+                // Find English (skip empty parts)
+                while(parts.length > currentPartIndex && parts[currentPartIndex].trim() === "") {
+                    currentPartIndex++;
+                }
+                if (parts.length > currentPartIndex) {
+                    english = parts[currentPartIndex].trim();
+                    // currentPartIndex++; // Not strictly needed for the last part
+                }
+
+                // Check if we got at least Sanskrit and English
+                if (sanskrit && english) {
                     validLinesFound++;
                     return {
                         id: item.originalIndex,
-                        sanskrit: parts[0].trim(),
-                        phonetic: parts[1].trim(),
-                        iast: parts[2].trim(),
-                        english: parts[3].trim(),
+                        sanskrit: sanskrit,
+                        phonetic: phonetic, // Will be empty if not found
+                        iast: iast,         // Will be empty if not found
+                        english: english,
                         status: 'unseen'
                     };
                 } else {
                     malformedLinesSkipped++;
-                    console.warn(`parseData Map: MALFORMED Line #${item.originalIndex + 1}. Expected >= 4 tab-separated parts, got ${parts.length}. Line content: "${line}". Parts found:`, JSON.stringify(parts));
+                    console.warn(`parseData Map: MALFORMED Line #${item.originalIndex + 1}. Could not extract essential Sanskrit and English parts. Line content: "${line}". Parts found:`, JSON.stringify(parts));
                     return null;
                 }
             }).filter(word => word !== null);
 
-        console.log(`parseData: Summary - Lines in input after processing: ${linesArray.length}, Comment/Empty lines skipped: ${commentOrEmptyLinesSkipped}, Malformed lines (due to parts count): ${malformedLinesSkipped}, Successfully parsed words: ${parsedWords.length} (from ${validLinesFound} validly structured lines).`);
+        console.log(`parseData: Summary - Lines in input after processing: ${linesArray.length}, Comment/Empty lines skipped: ${commentOrEmptyLinesSkipped}, Malformed lines (due to parts count or missing essential fields): ${malformedLinesSkipped}, Successfully parsed words: ${parsedWords.length} (from ${validLinesFound} validly structured lines).`);
         console.log("-------------------- PARSE DATA END ----------------------");
         return parsedWords;
     }
@@ -407,8 +445,8 @@
         }
 
         sanskritWordEl.textContent = word.sanskrit;
-        phonetic1El.textContent = word.phonetic;
-        phonetic2El.textContent = word.iast;
+        phonetic1El.textContent = word.phonetic; // This is Phonetic 1
+        phonetic2El.textContent = word.iast;     // This is Phonetic 2
         englishMeaningEl.textContent = word.english;
 
         const counterText = `${currentIndex + 1} of ${currentDeck.length}`;
