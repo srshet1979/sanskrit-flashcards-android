@@ -1,0 +1,56 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+   # Android Studio specific files
+   *.iml
+   .gradle
+   /local.properties
+   /.idea/caches
+   /.idea/libraries
+   /.idea/modules.xml
+   /.idea/workspace.xml
+   /.idea/navEditor.xml
+   /.idea/assetWizardSettings.xml
+   .DS_Store
+   build/
+   captures/
+   .cxx/
+   *.apk
+   *.aab
+   *.ap_
+   *.dex
+   *.class
+
+   # Kotlin
+   *.kts
+   *.ktm
+
+   # Local configuration files (sensitive information)
+   local.properties
+
+   #Keystore files (very sensitive - never commit these)
+   *.jks
+   *.keystore
+
+   # Log files
+   *.log
+
+   # Android Studio Profiler data
+   *.hprof
+   *.snapshot
+
+   # Misc
+   .attach_pid*
+   *~
