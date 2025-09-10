@@ -7,9 +7,8 @@
     <style>
         :root {
             --body-background: #333a45;
-            --card-front-background: #e9f5fe; /* Light blue for front */
-            --card-back-background: #fffada;  /* Light yellow for back */
-            --card-border: #cce7f8;
+            --card-front-background: #e9f5fe;
+            --card-back-background: #fffada;            --card-border: #cce7f8;
             --text-color: #333;
             --stats-text-color: #f0f0f0;
             --accent-color: #007bff;
@@ -17,38 +16,22 @@
             --wrong-color-value: #dc3545;
             --button-text-color: #fff;
         }
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: var(--body-background);
-            color: var(--stats-text-color);
-            padding: 10px;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0;
+            background-color: var(--body-background); color: var(--stats-text-color);
+            padding: 10px; overflow: hidden;
         }
         .app-container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 100%; max-width: 500px;
+            display: flex; flex-direction: column; align-items: center;
         }
         .stats-bar {
-            width: 100%;
-            padding: 10px 0;
-            text-align: center;
-            font-size: 1.1em;
-            color: var(--stats-text-color);
-            margin-bottom: 20px;
-            white-space: nowrap;
-            overflow-x: auto;
+            width: 100%; padding: 10px 0; text-align: center; font-size: 1.1em;
+            color: var(--stats-text-color); margin-bottom: 20px;
+            white-space: nowrap; overflow-x: auto;
         }
         .stats-bar span { margin: 0 5px; }
         .stat-value { font-weight: bold; }
@@ -57,62 +40,37 @@
         .stat-completion-value { color: var(--accent-color); }
 
         .flashcard-container {
-            perspective: 1000px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            margin-bottom: 20px;
+            perspective: 1000px; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; margin-bottom: 20px;
         }
         .flashcard {
-            width: 90%;
-            max-width: 400px;
-            min-height: 280px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s; /* This is the key transition for the flip */
-            cursor: pointer;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+            width: 90%; max-width: 400px; min-height: 280px;
+            position: relative; transform-style: preserve-3d;
+            transition: transform 0.6s; cursor: pointer;
+            border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
-        .flashcard.is-flipped {
-            transform: rotateY(180deg);
-        }
+        .flashcard.is-flipped { transform: rotateY(180deg); }
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            border-radius: 12px;
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; border-radius: 12px;
             background-color: var(--card-front-background);
             border: 1px solid var(--card-border);
-            text-align: center;
-            color: var(--text-color);
+            text-align: center; color: var(--text-color);
         }
-        .card-front {}
         .card-back {
             background-color: var(--card-back-background);
             transform: rotateY(180deg);
         }
-        .sanskrit-word {
-            font-size: 2.6em; margin-bottom: 10px; word-break: break-word;
-        }
-        .pronunciation {
-            font-size: 1.0em; line-height: 1.4; margin-bottom: 5px;
-        }
+        .sanskrit-word { font-size: 2.6em; margin-bottom: 10px; word-break: break-word; }
+        .pronunciation { font-size: 1.0em; line-height: 1.4; margin-bottom: 5px; }
         .pronunciation:last-of-type { margin-bottom: 10px; }
-        .english-meaning {
-            font-size: 1.8em; word-break: break-word;
-        }
+        .english-meaning { font-size: 1.8em; word-break: break-word; }
         .card-counter {
-            font-size: 0.85em; color: #666; position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
+            font-size: 0.85em; color: #666; position: absolute;
+            bottom: 10px; left: 0; right: 0; text-align: center;
         }
         .controls {
             width: 100%; display: flex; justify-content: space-between; align-items: center;
@@ -121,14 +79,15 @@
         .controls button {
             padding: 10px 15px; font-size: 1em; background-color: var(--accent-color);
             color: var(--button-text-color); border: none; border-radius: 8px; cursor: pointer;
-            min-width: 90px; text-align: center; transition: background-color 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            min-width: 80px; text-align: center; transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin: 0 3px;
         }
         .controls button.reset-button { background-color: #6c757d; }
         .controls button.reset-button:hover { background-color: #5a6268; }
-        .controls button:disabled {
-            background-color: #777; box-shadow: none; cursor: not-allowed;
-        }
+        .controls button.report-button { background-color: #ffc107; color: #212529; }
+        .controls button.report-button:hover { background-color: #e0a800; }
+        .controls button:disabled { background-color: #777; box-shadow: none; cursor: not-allowed; }
+
         .swipe-feedback {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
@@ -140,6 +99,36 @@
         .swipe-feedback.correct { background-color: rgba(40, 167, 69, 0.75); }
         .swipe-feedback.wrong { background-color: rgba(220, 53, 69, 0.75); }
         #loading-indicator {}
+
+        .modal {
+            display: none; position: fixed; z-index: 20;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.6);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #2c323b; color: var(--stats-text-color);
+            margin: 5% auto; padding: 20px; border: 1px solid #888;
+            width: 80%; max-width: 450px; border-radius: 10px; position: relative;
+        }
+        .close-button {
+            color: #aaa; float: right; font-size: 28px; font-weight: bold;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #fff; text-decoration: none; cursor: pointer;
+        }
+        #incorrect-words-list {
+            max-height: 200px; overflow-y: auto; margin-bottom: 20px;
+            padding: 10px; background-color: #333a45; border-radius: 5px;
+        }
+        #incorrect-words-list div { padding: 5px 0; border-bottom: 1px solid #444c56; }
+        #incorrect-words-list div:last-child { border-bottom: none; }
+        .modal-actions { text-align: center; margin-top: 15px; }
+        .modal-actions button {
+            padding: 10px 20px; font-size: 1em; background-color: var(--accent-color);
+            color: var(--button-text-color); border: none; border-radius: 8px; cursor: pointer;
+        }
+        .modal-actions button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -168,7 +157,19 @@
     <div class="controls">
         <button id="prev-button">Prev</button>
         <button id="reset-button" class="reset-button">Reset</button>
+        <button id="report-button" class="report-button">Report</button>
         <button id="next-button">Next</button>
+    </div>
+</div>
+
+<div id="report-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="close-report-modal">&times;</span>
+        <h2>Incorrectly Answered Words</h2>
+        <div id="incorrect-words-list"></div>
+        <div class="modal-actions">
+            <button id="practice-wrong-button">Practice These Words</button>
+        </div>
     </div>
 </div>
 
@@ -179,6 +180,17 @@
     let correctCount = 0;
     let wrongCount = 0;
     let uniqueWordsAttemptedInSession = new Set();
+    let incorrectlyAnsweredWordsList = [];
+
+    // NEW: For saving main session state
+    let mainSessionDeckState = {
+        deck: [],
+        index: 0,
+        attemptedSet: new Set(),
+        // correctCount: 0, // Optional: if you make stats non-cumulative during practice
+        // wrongCount: 0
+    };
+    let isInPracticeSession = false;
 
     const flashcardElement = document.getElementById('flashcard');
     const sanskritWordEl = document.getElementById('sanskrit-word');
@@ -190,12 +202,17 @@
     const prevButton = document.getElementById('prev-button');
     const nextButton = document.getElementById('next-button');
     const resetButton = document.getElementById('reset-button');
+    const reportButton = document.getElementById('report-button');
     const correctCountValEl = document.getElementById('correct-count');
     const wrongCountValEl = document.getElementById('wrong-count');
     const completionPercentageValEl = document.getElementById('completion-percentage');
     const loadingIndicator = document.getElementById('loading-indicator');
     const flashcardContainer = document.querySelector('.flashcard-container');
     const swipeFeedbackOverlay = document.getElementById('swipe-feedback-overlay');
+    const reportModal = document.getElementById('report-modal');
+    const closeReportModalButton = document.getElementById('close-report-modal');
+    const incorrectWordsListDiv = document.getElementById('incorrect-words-list');
+    const practiceWrongButton = document.getElementById('practice-wrong-button');
 
     console.log("SanskritFlashcards JS: Script start.");
 
@@ -206,6 +223,8 @@
         correctCountValEl.textContent = '0';
         wrongCountValEl.textContent = '0';
         completionPercentageValEl.textContent = '0%';
+        reportButton.disabled = true;
+        isInPracticeSession = false; // Ensure starts in main mode
 
         if (typeof AndroidInterface !== 'undefined' && typeof AndroidInterface.getSanskritWords === 'function') {
             try {
@@ -215,12 +234,12 @@
                     loadingIndicator.textContent = "Error: Empty data from Android."; return;
                 }
                 allWords = parseData(rawData);
-                console.log("JS: Parsed ${allWords.length} words.");
+                console.log(`JS: Parsed ${allWords.length} words.`);
                 if (allWords.length === 0) {
                     loadingIndicator.textContent = "No words found after parsing."; return;
                 }
-                resetStatsAndDeck();
-                updateDisplay();
+                resetStatsAndDeck(); // This also calls updateDisplay implicitly through the full reset path
+                updateDisplay(); // Explicit call to ensure view updates after reset and word load
                 loadingIndicator.style.display = 'none';
             } catch (e) {
                 loadingIndicator.textContent = "Init Error. Check console."; console.error("JS Init Error:", e);
@@ -238,7 +257,6 @@
     function parseData(dataString) {
         const processedDataString = dataString.replace(/\\n/g, '\n');
         const linesArray = processedDataString.split(/\r?\n/);
-        let malformedLinesSkipped = 0;
         let parsedWords = linesArray.map(line => line.trim())
             .filter(line => line.length > 0 && !line.startsWith("#"))
             .map((line, index) => {
@@ -252,9 +270,8 @@
                 sanskrit = getNextPart(); phonetic = getNextPart(); iast = getNextPart(); english = getNextPart();
                 if (sanskrit && english) {
                     return { id: index, sanskrit, phonetic, iast, english, status: 'unseen' };
-                } else {
-                    malformedLinesSkipped++; return null;
                 }
+                return null;
             }).filter(word => word !== null);
         return parsedWords;
     }
@@ -268,25 +285,35 @@
 
     function resetStatsAndDeck() {
         console.log("JS: resetStatsAndDeck called");
+        if (isInPracticeSession) {
+            console.log("JS: Was in practice session, ending it before full reset.");
+            isInPracticeSession = false;
+            // No need to restore mainSessionDeckState here as we are doing a full reset
+            mainSessionDeckState.deck = [];
+            mainSessionDeckState.index = 0;
+            mainSessionDeckState.attemptedSet.clear();
+        }
         correctCount = 0; wrongCount = 0; uniqueWordsAttemptedInSession.clear();
+        incorrectlyAnsweredWordsList = [];
         currentDeck = [...allWords];
         shuffleArray(currentDeck);
         currentIndex = 0;
         if (currentDeck.length > 0) currentDeck.forEach(word => word.status = 'unseen');
+
+        reportButton.textContent = "Report"; // Ensure correct text after reset
+        reportButton.disabled = true;
+        resetButton.disabled = false; // Re-enable reset button
+        // updateDisplay() will be called by the function that invoked reset typically, or by initializeApp
     }
 
     function updateDisplay() {
-        console.log("JS: updateDisplay. Idx:", currentIndex, "Deck:", currentDeck.length);
-
-        // ***** STRONGER FIX (Option B) *****
+        console.log("JS: updateDisplay. Idx:", currentIndex, "Deck:", currentDeck.length, "PracticeMode:", isInPracticeSession);
         if (flashcardElement.classList.contains('is-flipped')) {
-            console.log("JS: Card was flipped, INSTANTLY removing 'is-flipped'.");
-            flashcardElement.style.transition = 'none'; // Temporarily disable animation
+            flashcardElement.style.transition = 'none';
             flashcardElement.classList.remove('is-flipped');
-            void flashcardElement.offsetHeight; // Force browser reflow/repaint
-            flashcardElement.style.transition = ''; // Re-enable animation (restores from CSS)
+            void flashcardElement.offsetHeight;
+            flashcardElement.style.transition = '';
         }
-        // ***** END STRONGER FIX *****
 
         if (currentDeck.length === 0 || currentIndex < 0 || currentIndex >= currentDeck.length) {
             console.log("JS: No card to display or index OOB.");
@@ -295,15 +322,30 @@
             englishMeaningEl.textContent = ''; cardCounterFrontEl.textContent = ''; cardCounterBackEl.textContent = '';
             prevButton.disabled = true; nextButton.disabled = true;
             resetButton.disabled = allWords.length === 0;
+
+            let endMessage = "Deck complete.";
+            if (isInPracticeSession) {
+                endMessage = "Practice complete!";
+                reportButton.textContent = "End Practice";
+                reportButton.disabled = false; // Always allow ending practice
+            } else {
+                reportButton.textContent = "Report";
+                reportButton.disabled = incorrectlyAnsweredWordsList.length === 0 && allWords.length > 0;
+                if (incorrectlyAnsweredWordsList.length > 0) endMessage += " View report or practice wrong words.";
+                else endMessage += " Reset to start again.";
+            }
+
             if (allWords.length > 0) {
-                flashcardElement.innerHTML = `<div class="card-face card-front" style="display:flex; align-items:center; justify-content:center; font-size:1.2em;">Deck complete or no words.</div>`;
+                 flashcardElement.innerHTML = `<div class="card-face card-front" style="display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:1.2em;">${endMessage}</div>`;
+                 flashcardContainer.style.display = 'flex';
+            } else {
+                flashcardElement.innerHTML = `<div class="card-face card-front" style="display:flex; align-items:center; justify-content:center; font-size:1.2em;">No words loaded.</div>`;
                 flashcardContainer.style.display = 'flex';
             }
             updateStats(); return;
         }
         flashcardContainer.style.display = 'flex';
         const word = currentDeck[currentIndex];
-        console.log("JS: Displaying word:", word.sanskrit);
         sanskritWordEl.textContent = word.sanskrit;
         phonetic1El.textContent = word.phonetic || '';
         phonetic2El.textContent = word.iast || '';
@@ -314,39 +356,71 @@
         phonetic2El.style.display = word.iast ? 'block' : 'none';
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex === currentDeck.length - 1;
-        resetButton.disabled = false;
+
+        // Update button states based on mode
+        if (isInPracticeSession) {
+            reportButton.textContent = "End Practice";
+            reportButton.disabled = false;
+            resetButton.disabled = true; // Disable full reset during practice
+        } else {
+            reportButton.textContent = "Report";
+            reportButton.disabled = incorrectlyAnsweredWordsList.length === 0;
+            resetButton.disabled = false;
+        }
         updateStats();
     }
 
     function updateStats() {
         correctCountValEl.textContent = correctCount;
         wrongCountValEl.textContent = wrongCount;
-        const totalWords = allWords.length;
-        if (totalWords > 0) {
-            const perc = Math.round((uniqueWordsAttemptedInSession.size / totalWords) * 100);
+
+        // Completion percentage should reflect the current deck context (main or practice)
+        let totalForCompletion = isInPracticeSession ? incorrectlyAnsweredWordsList.length : allWords.length;
+        if (totalForCompletion === 0 && allWords.length > 0 && !isInPracticeSession) { // Edge case: practicing but original list was empty
+            totalForCompletion = allWords.length; // Fallback to allWords if practice initiated on empty error list
+        }
+        if (totalForCompletion > 0) {
+            // uniqueWordsAttemptedInSession for practice mode will be relative to practice deck if cleared
+            // if not cleared, it reflects overall attempts. Let's make it relative to current deck.
+            const relevantAttemptedCount = Array.from(uniqueWordsAttemptedInSession).filter(id => currentDeck.some(w => w.id === id)).length;
+            const perc = Math.round((relevantAttemptedCount / currentDeck.length) * 100);
             completionPercentageValEl.textContent = `${perc}%`;
         } else {
             completionPercentageValEl.textContent = '0%';
         }
     }
 
-    function showNextCard() {
-        if (currentIndex < currentDeck.length - 1) { currentIndex++; updateDisplay(); }
-    }
-    function showPrevCard() {
-        if (currentIndex > 0) { currentIndex--; updateDisplay(); }
-    }
+    function showNextCard() { if (currentIndex < currentDeck.length - 1) { currentIndex++; updateDisplay(); } }
+    function showPrevCard() { if (currentIndex > 0) { currentIndex--; updateDisplay(); } }
 
     function markCard(isCorrect) {
         if (currentIndex >= 0 && currentIndex < currentDeck.length) {
             const word = currentDeck[currentIndex];
-            if (!uniqueWordsAttemptedInSession.has(word.id)) {
-                if (isCorrect) { correctCount++; word.status = 'correct'; }
-                else { wrongCount++; word.status = 'wrong'; }
-                uniqueWordsAttemptedInSession.add(word.id);
+            let firstTimeOverallAttempt = !mainSessionDeckState.attemptedSet.has(word.id) && !isInPracticeSession;
+            let firstTimePracticeAttempt = !uniqueWordsAttemptedInSession.has(word.id) && isInPracticeSession;
+
+
+            if (isCorrect) {
+                if (!isInPracticeSession && word.status !== 'correct') correctCount++; // Count main correct only if not already correct
+                word.status = 'correct';
+                incorrectlyAnsweredWordsList = incorrectlyAnsweredWordsList.filter(w => w.id !== word.id);
+            } else {
+                if (!isInPracticeSession && word.status !== 'wrong') wrongCount++; // Count main wrong only if not already wrong
+                word.status = 'wrong';
+                if (!incorrectlyAnsweredWordsList.some(w => w.id === word.id)) {
+                    incorrectlyAnsweredWordsList.push(word);
+                }
             }
-            updateStats();
-            showSwipeFeedback(isCorrect);
+             // Add to session attempts regardless of main or practice for overall tracking
+            uniqueWordsAttemptedInSession.add(word.id);
+            if (!isInPracticeSession) { // also add to main if in main session
+                 mainSessionDeckState.attemptedSet.add(word.id);
+            }
+
+
+            if (!isInPracticeSession) reportButton.disabled = incorrectlyAnsweredWordsList.length === 0;
+
+            updateStats(); showSwipeFeedback(isCorrect);
             if (typeof AndroidInterface !== 'undefined' && AndroidInterface.performHapticFeedback) {
                 AndroidInterface.performHapticFeedback();
             }
@@ -363,26 +437,119 @@
         setTimeout(() => { swipeFeedbackOverlay.classList.remove('show'); }, 600);
     }
 
+    function displayReport() {
+        incorrectWordsListDiv.innerHTML = '';
+        if (incorrectlyAnsweredWordsList.length === 0) {
+            incorrectWordsListDiv.innerHTML = '<div>No words answered incorrectly yet. Keep going!</div>';
+            practiceWrongButton.style.display = 'none';
+            return;
+        }
+        practiceWrongButton.style.display = 'inline-block';
+        incorrectlyAnsweredWordsList.forEach(word => {
+            const wordDiv = document.createElement('div');
+            wordDiv.textContent = `${word.sanskrit} - ${word.english}`;
+            if (word.phonetic) wordDiv.textContent += ` (${word.phonetic})`;
+            incorrectWordsListDiv.appendChild(wordDiv);
+        });
+    }
+
+    function startPracticeWrongWordsSession() {
+        if (incorrectlyAnsweredWordsList.length === 0) {
+            console.log("JS: No incorrect words to practice.");
+            if(typeof AndroidInterface !== 'undefined' && AndroidInterface.showToast) {
+                AndroidInterface.showToast("No incorrect words to practice!");
+            }
+            return;
+        }
+        reportModal.style.display = 'none';
+
+        if (!isInPracticeSession) { // Save main session state ONLY if transitioning from main
+            console.log("JS: Saving main session state before starting practice.");
+            mainSessionDeckState.deck = [...currentDeck];
+            mainSessionDeckState.index = currentIndex;
+            mainSessionDeckState.attemptedSet = new Set(uniqueWordsAttemptedInSession);
+            // Optional: save correctCount/wrongCount if they are not cumulative
+        }
+        isInPracticeSession = true;
+        console.log("JS: Starting practice session with", incorrectlyAnsweredWordsList.length, "words.");
+        currentDeck = [...incorrectlyAnsweredWordsList];
+        shuffleArray(currentDeck);
+        currentIndex = 0;
+
+        // For practice completion %: clear current session attempts for this specific practice round
+        uniqueWordsAttemptedInSession.clear();
+
+        currentDeck.forEach(word => word.status = 'unseen'); // Reset status for this practice run
+
+        flashcardElement.classList.remove('is-flipped');
+        updateDisplay();
+        // updateDisplay will set button text and states
+    }
+
+    function endPracticeSessionAndReturnToMain() {
+        if (!isInPracticeSession) {
+            console.log("JS: Not in practice session, cannot end.");
+            return;
+        }
+        console.log("JS: Ending practice session and returning to main deck.");
+        isInPracticeSession = false;
+
+        currentDeck = [...mainSessionDeckState.deck];
+        currentIndex = mainSessionDeckState.index;
+        uniqueWordsAttemptedInSession = new Set(mainSessionDeckState.attemptedSet); // Restore main session attempts
+
+        // Clear the saved state as it's now restored
+        mainSessionDeckState.deck = [];
+        mainSessionDeckState.index = 0;
+        mainSessionDeckState.attemptedSet.clear();
+
+        flashcardElement.classList.remove('is-flipped');
+        updateDisplay(); // updateDisplay will set button text and states correctly
+    }
+
     function setupEventListeners() {
         console.log("JS: setupEventListeners called");
         flashcardElement.addEventListener('click', () => {
             flashcardElement.classList.toggle('is-flipped');
-            console.log("JS: Card clicked. Flipped:", flashcardElement.classList.contains('is-flipped'));
         });
         nextButton.addEventListener('click', showNextCard);
         prevButton.addEventListener('click', showPrevCard);
+
         resetButton.addEventListener('click', () => {
             console.log("JS: Reset button clicked");
+            if (isInPracticeSession) { // If in practice, reset means ending practice and then full reset
+                // endPracticeSessionAndReturnToMain(); // This would take them back to main deck first
+                // Forcing full reset, which also clears practice state in resetStatsAndDeck
+                if (typeof AndroidInterface !== 'undefined' && AndroidInterface.showToast) {
+                     AndroidInterface.showToast("Full reset initiated. Practice session ended.");
+                }
+            }
             if (typeof AndroidInterface !== 'undefined' && AndroidInterface.performHapticFeedback) {
                 AndroidInterface.performHapticFeedback();
             }
-            resetStatsAndDeck(); updateDisplay();
+            resetStatsAndDeck();
+            updateDisplay(); // Display first card of new full deck
             flashcardContainer.style.display = currentDeck.length > 0 ? 'flex' : 'none';
+        });
+
+        reportButton.addEventListener('click', () => {
+            if (isInPracticeSession) {
+                console.log("JS: 'End Practice' button clicked");
+                endPracticeSessionAndReturnToMain();
+            } else {
+                console.log("JS: 'Report' button clicked");
+                displayReport();
+                reportModal.style.display = 'block';
+            }
+        });
+        closeReportModalButton.addEventListener('click', () => { reportModal.style.display = 'none'; });
+        practiceWrongButton.addEventListener('click', startPracticeWrongWordsSession);
+        window.addEventListener('click', (event) => {
+            if (event.target == reportModal) { reportModal.style.display = 'none'; }
         });
 
         let touchstartX = 0, touchendX = 0, touchstartY = 0, touchendY = 0;
         const swipeThreshold = 50, swipeVerticalThreshold = 70;
-
         flashcardContainer.addEventListener('touchstart', e => {
             touchstartX = e.changedTouches[0].screenX; touchstartY = e.changedTouches[0].screenY;
         }, { passive: true });
@@ -395,20 +562,12 @@
             const deltaX = touchendX - touchstartX;
             const deltaY = touchendY - touchstartY;
             if (Math.abs(deltaY) > swipeVerticalThreshold) return;
-
             if (Math.abs(deltaX) > swipeThreshold) {
                 if (!flashcardElement.classList.contains('is-flipped')) {
-                    console.log("JS: Swipe on front. Flipping.");
                     flashcardElement.classList.add('is-flipped'); return;
                 }
-                // SWIPE DIRECTION CORRECTED
-                if (deltaX < 0) { // Swiped Left (finger moved R to L)
-                    console.log("JS: Swiped left on back (Mark WRONG).");
-                    markCard(false); // Mark as WRONG
-                } else { // Swiped Right (finger moved L to R)
-                    console.log("JS: Swiped right on back (Mark CORRECT).");
-                    markCard(true); // Mark as CORRECT
-                }
+                if (deltaX < 0) { markCard(false); } // Swiped Left = WRONG
+                else { markCard(true); } // Swiped Right = CORRECT
             }
         }
     }
